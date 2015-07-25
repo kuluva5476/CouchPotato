@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding="utf-8"?>
+<channels>
+	<channel id="discovery" display_name="探索頻道">sop://124.232.150.188:3920/5700</channel>
+	<channel id="vljapan" display_name="緯來日本台">sop://124.232.150.188:3920/5733</channel>
+	<channel id="3ltaiwan" display_name="三立台灣台">sop://124.232.150.188:3920/5706</channel>
+	<channel id="3lmetro" display_name="三立都會台">sop://124.232.150.188:3920/5707</channel>
+	<channel id="jettv" display_name="JET 綜合台">sop://124.232.150.188:3920/5708</channel>
+	<channel id="ctient" display_name="中天娛樂台">sop://124.232.150.188:3920/5709</channel>
+</channels>
