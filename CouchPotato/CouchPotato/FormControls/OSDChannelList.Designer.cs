@@ -1,4 +1,4 @@
-﻿namespace com.CouchPotato.UserControls
+﻿namespace com.CouchPotato.FormControls
 {
     partial class OSDChannelList
     {

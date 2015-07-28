@@ -15,7 +15,14 @@ namespace CouchPotato
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new com.CouchPotato.Main.MainForm());
+            try
+            {
+                Application.Run(new com.CouchPotato.Main.MainForm());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
     }
 }
