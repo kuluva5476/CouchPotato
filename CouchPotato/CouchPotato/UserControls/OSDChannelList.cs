@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
 using com.CouchPotato;
+using System.Drawing.Text;
 
 namespace com.CouchPotato.UserControls
 {
@@ -31,7 +32,7 @@ namespace com.CouchPotato.UserControls
         //private int _Y = 20;
 
         private int _LabelWidth = 300;
-        private int _LabelHeight = 32;
+        private int _LabelHeight = 35;
 
         // Maximum number of Labels set to 9...
         Label[] _lblChannels = new Label[9];
@@ -79,16 +80,36 @@ namespace com.CouchPotato.UserControls
         /// </summary>
         public void initChannelList()
         {
+
             readChannels();
             _Offset = (_ChannelsOnScreen - 1) / 2;
             _HighlightedIndex = 0;
+
+            // Get font from application path
+            string sFontPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\wt006.ttf";
+            
+
+            PrivateFontCollection pfc = new PrivateFontCollection();
+            Font oFont;
+
+            //label1.Font = new Font(pfc.Families[0], 16, FontStyle.Regular);
 
             for (int i = 0; i < _ChannelsOnScreen; i++)
             {
                 _lblChannels[i] = new Label();
                 Label lbl = _lblChannels[i];
 
-                lbl.Font = new Font(lbl.Font.FontFamily, 20);
+                if (System.IO.File.Exists(sFontPath))
+                {
+                    pfc.AddFontFile(sFontPath);
+                    oFont = new Font(pfc.Families[0], 18, FontStyle.Regular);
+                }
+                else
+                {
+                    oFont = new Font(lbl.Font.FontFamily, 20); 
+                }
+
+                lbl.Font = oFont;//new Font(lbl.Font.FontFamily, 20);
                 lbl.ForeColor = Color.FromArgb(0xffffff);
                 lbl.BackColor = Color.FromArgb(0x30, 0x30, 0x30);
                 lbl.AutoSize = false;
@@ -96,6 +117,10 @@ namespace com.CouchPotato.UserControls
                 lbl.Location = new System.Drawing.Point(0, _LabelHeight * i);
                 lbl.Name = "label1";
                 lbl.Size = new System.Drawing.Size(_LabelWidth, _LabelHeight);
+                lbl.TextAlign = ContentAlignment.MiddleLeft;
+                
+
+
                 this.Controls.Add(lbl);
             }
             // Bold & Yellow for selected channel
