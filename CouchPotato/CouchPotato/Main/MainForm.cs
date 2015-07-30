@@ -7,7 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using OpenTK.Input;
-
+using com.CouchPotato.GameController;
 namespace com.CouchPotato.Main
 {
     public partial class MainForm : Form
@@ -15,6 +15,8 @@ namespace com.CouchPotato.Main
         bool _IsMenuShown = false;
 
         System.Timers.Timer _Timer = new System.Timers.Timer();
+
+        com.CouchPotato.GameController.Joystick _Joystick;
 
         // Joystick Axis
         //float _DefaultAxis;
@@ -31,133 +33,68 @@ namespace com.CouchPotato.Main
         /// <param name="e"></param>
         private void MainForm_Load(object sender, EventArgs e)
         {
-            // 暫時只有 Joystick 1
-            //_DefaultAxis = Joystick.GetState(1).GetAxis(JoystickAxis.Axis1);
-            
-
-            _Timer.Elapsed += new System.Timers.ElapsedEventHandler(_Timer_Elapsed);
-
-            _Timer.Interval = 250;
-            _Timer.Start();
+            _Joystick = new com.CouchPotato.GameController.Joystick();
+            _Joystick.JoystickPressed += new com.CouchPotato.GameController.Joystick.JoystickPressedEventHandler(j_JoystickPressed);
+            _Joystick.Initialize();
 
             osdChannelList1.ChannelList = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\ChannelList.xml";
             osdChannelList1.initChannelList();
 
-            axsopocx1.SendToBack();
-            axsopocx1.Select();
-            axsopocx1.SetFullscreen();
-            axsopocx1.InitPlayer();
-            axsopocx1.SetFullscreen();
-
-            axsopocx1.Dock = DockStyle.Fill;
         }
 
-
-        delegate void JoystickCallback(string _Direction);
-
-        private void JoystickPressed(string _Button)
+        /// <summary>
+        /// Joystick Pressed event
+        /// </summary>
+        /// <param name="e">Buttons, DPad, DirectionHat</param>
+        void j_JoystickPressed(JoystickPressedEventArgs e)
         {
             if (osdChannelList1.InvokeRequired)
             {
-                JoystickCallback d = new JoystickCallback(JoystickPressed);
-                this.Invoke(d, new object[] {_Button});
+                JoystickPressedCallback d = new JoystickPressedCallback(j_JoystickPressed);
+                this.Invoke(d, new object[] { e });
             }
             else
             {
-                if (_Button == "L")
+                if (e.Buttons.L)
                 {
-                    axsopocx1.Stop();
                     _Timer.Stop();
                     this.Close();
                 }
                 if (_IsMenuShown)
                 {
-                    if (_Button == "UP")
+                    if (e.DPadDirection == DPad.Up || e.HatDirection == HatPosition.Up)
                     {
                         osdChannelList1.channelUp();
                     }
-                    else if (_Button == "DOWN")
+                    else if (e.DPadDirection == DPad.Down || e.HatDirection == HatPosition.Down)
                     {
                         osdChannelList1.channelDown();
                     }
-                    else if (_Button == "A")
+                    else if (e.Buttons.A)
                     {
                         if (_IsMenuShown)
                         {
-                            // 頻道有變動才改
-                            if (axsopocx1.SopAddress != osdChannelList1.ChannelAddress)
-                            {
-                                axsopocx1.SetSopAddress(osdChannelList1.ChannelAddress);
-                                axsopocx1.Play();
-                            }
+                            axVLCPlugin21.playlist.clear();
+                            axVLCPlugin21.playlist.add(osdChannelList1.ChannelAddress, null, null);
+                            axVLCPlugin21.playlist.playItem(0);
                             showOSD(!_IsMenuShown);
                         }
                     }
-                    if (_Button == "B")
+                    if (e.Buttons.B)
                     {
                         showOSD(false);
                     }
                 }
                 else
                 {
-                        showOSD(!_IsMenuShown && _Button!="B");
+                    showOSD(!_IsMenuShown && !e.Buttons.B);
                 }
             }
+
         }
 
-        /// <summary>
-        /// 讀取 Joystick input 用
-        /// </summary>
-        void _Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            _Timer.Stop();
+        delegate void JoystickPressedCallback(JoystickPressedEventArgs e);
 
-            try
-            {
-                var state = Joystick.GetState(1);
-
-                int nAxis = (int) Math.Round(state.GetAxis(JoystickAxis.Axis1), 0);
-                // 上下
-                if (nAxis < 0)
-                {
-                    //Debug.Print(state.ToString());
-                    JoystickPressed("DOWN");
-                }
-                else if (nAxis > 0)
-                {
-                    //Debug.Print(state.ToString());
-                    JoystickPressed("UP");
-                }
-
-                // 其它按鍵
-                // 先假設使用者不會笨到兩顆一起按 =.=
-
-                // A: 選台
-                if (state.IsButtonDown(JoystickButton.Button1))
-                { 
-                    JoystickPressed("A");
-                }
-
-                // B: 關閉 OSD
-                if (state.IsButtonDown(JoystickButton.Button2))
-                { 
-                    JoystickPressed("B");
-                }
-
-                if (state.IsButtonDown(JoystickButton.Button6))
-                {
-                    JoystickPressed("L");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-
-            
-            
-            _Timer.Start();
-        }
         /// <summary>
         /// Show/Hide OSD
         /// </summary>
@@ -168,23 +105,28 @@ namespace com.CouchPotato.Main
             _IsMenuShown = _Visible;
         }
 
-        // 觸發鍵盤事件
+
         /// <summary>
-        /// Key Down Event
+        /// Form closing
+        /// </summary>
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Stop playing
+            axVLCPlugin21.playlist.stop();
+            // Release joystick (stop timer)
+            _Joystick.Dispose();
+        }
+
+        /// <summary>
+        /// VLC Player Keydown event
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void axsopocx1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        private void axVLCPlugin21_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
             switch (e.KeyCode)
             {
                 case Keys.F4:
-                    try
-                    {
-                        axsopocx1.Stop();
-                    }
-                    catch (Exception ex)
-                    { }
                     _Timer.Stop();
                     this.Close();
                     break;
@@ -204,12 +146,10 @@ namespace com.CouchPotato.Main
                 case Keys.Enter:
                     if (_IsMenuShown)
                     {
-                        // 頻道有變動才改
-                        if (axsopocx1.SopAddress != osdChannelList1.ChannelAddress)
-                        {
-                            axsopocx1.SetSopAddress(osdChannelList1.ChannelAddress);
-                            axsopocx1.Play();
-                        }
+                        axVLCPlugin21.playlist.clear();
+                        axVLCPlugin21.playlist.add(osdChannelList1.ChannelAddress, null, null);
+                        axVLCPlugin21.playlist.playItem(0);
+
                         showOSD(!_IsMenuShown);
                     }
                     else
@@ -224,5 +164,6 @@ namespace com.CouchPotato.Main
                     break;
             }
         }
+
     }
 }

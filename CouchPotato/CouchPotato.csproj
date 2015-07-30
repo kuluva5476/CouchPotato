@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="CouchPotato\ChannelItem.cs" />
     <Compile Include="CouchPotato\ChannelItemCollection.cs" />
+    <Compile Include="CouchPotato\GameController\Joystick.cs" />
     <Compile Include="CouchPotato\Main\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -96,20 +97,20 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <COMReference Include="AxsopLib">
-      <Guid>{E0AFEA58-EF81-41AB-8956-D3E1C1E5FA22}</Guid>
+    <COMReference Include="AxAXVLC">
+      <Guid>{DF2BBE39-40A8-433B-A279-073F48DA94B6}</Guid>
       <VersionMajor>1</VersionMajor>
       <VersionMinor>0</VersionMinor>
       <Lcid>0</Lcid>
       <WrapperTool>aximp</WrapperTool>
       <Isolated>False</Isolated>
     </COMReference>
-    <COMReference Include="AxsopocxLib">
-      <Guid>{18F64ED3-F6C9-456D-B642-7B5D7142781E}</Guid>
+    <COMReference Include="AXVLC">
+      <Guid>{DF2BBE39-40A8-433B-A279-073F48DA94B6}</Guid>
       <VersionMajor>1</VersionMajor>
       <VersionMinor>0</VersionMinor>
       <Lcid>0</Lcid>
-      <WrapperTool>aximp</WrapperTool>
+      <WrapperTool>tlbimp</WrapperTool>
       <Isolated>False</Isolated>
     </COMReference>
     <COMReference Include="sopLib">

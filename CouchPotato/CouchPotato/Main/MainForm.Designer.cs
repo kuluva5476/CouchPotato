@@ -29,20 +29,21 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.axsopocx1 = new AxsopocxLib.Axsopocx();
+            this.axVLCPlugin21 = new AxAXVLC.AxVLCPlugin2();
             this.osdChannelList1 = new com.CouchPotato.UserControls.OSDChannelList();
-            ((System.ComponentModel.ISupportInitialize)(this.axsopocx1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.axVLCPlugin21)).BeginInit();
             this.SuspendLayout();
             // 
-            // axsopocx1
+            // axVLCPlugin21
             // 
-            this.axsopocx1.Enabled = true;
-            this.axsopocx1.Location = new System.Drawing.Point(12, 12);
-            this.axsopocx1.Name = "axsopocx1";
-            this.axsopocx1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axsopocx1.OcxState")));
-            this.axsopocx1.Size = new System.Drawing.Size(484, 356);
-            this.axsopocx1.TabIndex = 1;
-            this.axsopocx1.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.axsopocx1_PreviewKeyDown);
+            this.axVLCPlugin21.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.axVLCPlugin21.Enabled = true;
+            this.axVLCPlugin21.Location = new System.Drawing.Point(0, 0);
+            this.axVLCPlugin21.Name = "axVLCPlugin21";
+            this.axVLCPlugin21.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axVLCPlugin21.OcxState")));
+            this.axVLCPlugin21.Size = new System.Drawing.Size(549, 398);
+            this.axVLCPlugin21.TabIndex = 1;
+            this.axVLCPlugin21.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.axVLCPlugin21_PreviewKeyDown);
             // 
             // osdChannelList1
             // 
@@ -58,7 +59,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(549, 398);
             this.Controls.Add(this.osdChannelList1);
-            this.Controls.Add(this.axsopocx1);
+            this.Controls.Add(this.axVLCPlugin21);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.KeyPreview = true;
@@ -67,15 +68,16 @@
             this.Text = "CouchPotato";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.MainForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.axsopocx1)).EndInit();
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            ((System.ComponentModel.ISupportInitialize)(this.axVLCPlugin21)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private AxsopocxLib.Axsopocx axsopocx1;
         private com.CouchPotato.UserControls.OSDChannelList osdChannelList1;
+        private AxAXVLC.AxVLCPlugin2 axVLCPlugin21;
         //private AlphaLabel alphaLabel1;
     }
 }
