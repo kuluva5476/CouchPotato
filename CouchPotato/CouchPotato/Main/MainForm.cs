@@ -33,6 +33,9 @@ namespace com.CouchPotato.Main
         /// <param name="e"></param>
         private void MainForm_Load(object sender, EventArgs e)
         {
+            //this.Cursor.
+            Cursor.Hide();
+
             _Joystick = new com.CouchPotato.GameController.Joystick();
             _Joystick.JoystickPressed += new com.CouchPotato.GameController.Joystick.JoystickPressedEventHandler(j_JoystickPressed);
             _Joystick.Initialize();

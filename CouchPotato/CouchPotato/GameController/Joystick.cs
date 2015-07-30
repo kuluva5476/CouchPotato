@@ -69,7 +69,7 @@ namespace com.CouchPotato.GameController
         public void Initialize()
         {
             _Timer.Elapsed += new System.Timers.ElapsedEventHandler(_Timer_Elapsed);
-            _Timer.Interval = 120;
+            _Timer.Interval = 250;
             _Timer.Start();
         }
 
