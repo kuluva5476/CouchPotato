@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace CouchPotato
+namespace WindowsFormsApplication1
 {
     static class Program
     {
@@ -15,14 +15,7 @@ namespace CouchPotato
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            try
-            {
-                Application.Run(new com.CouchPotato.Main.MainForm());
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+            Application.Run(new com.CouchPotato.Main.MainForm());
         }
     }
 }

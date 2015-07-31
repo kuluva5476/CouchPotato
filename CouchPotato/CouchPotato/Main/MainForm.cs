@@ -14,9 +14,11 @@ namespace com.CouchPotato.Main
     {
         bool _IsMenuShown = false;
 
-        System.Timers.Timer _Timer = new System.Timers.Timer();
+        //System.Timers.Timer _Timer = new System.Timers.Timer();
 
         com.CouchPotato.GameController.Joystick _Joystick;
+
+        string _CurrentPlaying = "";
 
         // Joystick Axis
         //float _DefaultAxis;
@@ -37,31 +39,71 @@ namespace com.CouchPotato.Main
             Cursor.Hide();
 
             _Joystick = new com.CouchPotato.GameController.Joystick();
-            _Joystick.JoystickPressed += new com.CouchPotato.GameController.Joystick.JoystickPressedEventHandler(j_JoystickPressed);
+            _Joystick.JoystickPressed += new com.CouchPotato.GameController.Joystick.JoystickPressedEventHandler(Joystick_JoystickPressed);
+            //_Joystick.JoystickTrace += new com.CouchPotato.GameController.Joystick.JoystickTraceEventHandler(Joystick_JoystickTrace);
             _Joystick.Initialize();
 
             osdChannelList1.ChannelList = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\ChannelList.xml";
+            osdChannelList1.ThumbnailPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\Thumbnails\\" ;
             osdChannelList1.initChannelList();
 
+            axVLCPlugin21.volume = 100;
+            label1.Text = "";
+
         }
+
+        delegate void JoystickTraceCallback(JoystickTraceEventArgs e);
+
+        void Joystick_JoystickTrace(JoystickTraceEventArgs e)
+        {
+            if (osdChannelList1.InvokeRequired)
+            {
+                JoystickTraceCallback d = new JoystickTraceCallback(Joystick_JoystickTrace);
+                this.Invoke(d, new object[] { e });
+            }
+            else
+            {
+                label1.Text = e.TraceMessage;
+            }
+        }
+
+        delegate void JoystickPressedCallback(JoystickPressedEventArgs e);
 
         /// <summary>
         /// Joystick Pressed event
         /// </summary>
         /// <param name="e">Buttons, DPad, DirectionHat</param>
-        void j_JoystickPressed(JoystickPressedEventArgs e)
+        void Joystick_JoystickPressed(JoystickPressedEventArgs e)
         {
             if (osdChannelList1.InvokeRequired)
             {
-                JoystickPressedCallback d = new JoystickPressedCallback(j_JoystickPressed);
+                JoystickPressedCallback d = new JoystickPressedCallback(Joystick_JoystickPressed);
                 this.Invoke(d, new object[] { e });
             }
             else
             {
+                label1.Text = e.TraceMessage;
+                if (e.Buttons.Start)
+                //if (e.Buttons.L)
+                {
+                    //_Timer.Stop();
+                    this.Close();
+                }
                 if (e.Buttons.L)
                 {
-                    _Timer.Stop();
-                    this.Close();
+                    int nVolume = axVLCPlugin21.volume - 5;
+                    if (nVolume < 0)
+                        nVolume = 0;
+                    axVLCPlugin21.volume = nVolume;
+
+                }
+                if (e.Buttons.R)
+                {
+                    int nVolume = axVLCPlugin21.volume + 5;
+                    if (nVolume > 100)
+                        nVolume = 100;
+                    axVLCPlugin21.volume = nVolume;
+
                 }
                 if (_IsMenuShown)
                 {
@@ -77,26 +119,29 @@ namespace com.CouchPotato.Main
                     {
                         if (_IsMenuShown)
                         {
-                            axVLCPlugin21.playlist.clear();
-                            axVLCPlugin21.playlist.add(osdChannelList1.ChannelAddress, null, null);
-                            axVLCPlugin21.playlist.playItem(0);
                             showOSD(!_IsMenuShown);
+                            Application.DoEvents();
+                            if (_CurrentPlaying != osdChannelList1.ChannelAddress)
+                            {
+                                axVLCPlugin21.playlist.clear();
+                                axVLCPlugin21.playlist.add(osdChannelList1.ChannelAddress, null, null);
+                                axVLCPlugin21.playlist.playItem(0);
+                                _CurrentPlaying = osdChannelList1.ChannelAddress;
+                            }
                         }
                     }
-                    if (e.Buttons.B)
+                    else if (e.Buttons.B)
                     {
                         showOSD(false);
                     }
                 }
                 else
                 {
-                    showOSD(!_IsMenuShown && !e.Buttons.B);
+                    if (e.Buttons.A || e.Buttons.B || e.DPadDirection == DPad.Up || e.DPadDirection == DPad.Down || e.HatDirection == HatPosition.Up || e.HatDirection == HatPosition.Down )
+                        showOSD(!_IsMenuShown || !e.Buttons.B);
                 }
             }
-
         }
-
-        delegate void JoystickPressedCallback(JoystickPressedEventArgs e);
 
         /// <summary>
         /// Show/Hide OSD
@@ -108,16 +153,24 @@ namespace com.CouchPotato.Main
             _IsMenuShown = _Visible;
         }
 
-
         /// <summary>
         /// Form closing
         /// </summary>
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             // Stop playing
-            axVLCPlugin21.playlist.stop();
+            try
+            {
+                //_Joystick.JoystickPressed -= 
+                //_Joystick.Dispose();
+                //axVLCPlugin21.playlist.stop();
+                Application.Exit();
+            }
+            catch (Exception ex)
+            {
+                label1.Text = ex.Message;
+            }
             // Release joystick (stop timer)
-            _Joystick.Dispose();
         }
 
         /// <summary>
@@ -127,10 +180,11 @@ namespace com.CouchPotato.Main
         /// <param name="e"></param>
         private void axVLCPlugin21_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
+            label1.Text = e.KeyCode.ToString();
             switch (e.KeyCode)
             {
                 case Keys.F4:
-                    _Timer.Stop();
+                    //_Timer.Stop();
                     this.Close();
                     break;
                 case Keys.Up:
@@ -146,14 +200,35 @@ namespace com.CouchPotato.Main
                     else
                         showOSD(!_IsMenuShown);
                     break;
+                case Keys.Subtract: case Keys.OemMinus:
+                    int nVolume = axVLCPlugin21.volume - 5;
+                    if (nVolume <= 0)
+                        nVolume = 0;
+                    axVLCPlugin21.volume = nVolume;
+                    break;
+
+                case Keys.Add: case Keys.Oemplus:
+                    nVolume = axVLCPlugin21.volume + 5;
+                    if (nVolume > 100)
+                        nVolume = 100;
+                    axVLCPlugin21.volume = nVolume;
+                    break;
+
+                case Keys.Oem5:
+                    axVLCPlugin21.volume = 0;
+                    break;
+                
                 case Keys.Enter:
                     if (_IsMenuShown)
                     {
-                        axVLCPlugin21.playlist.clear();
-                        axVLCPlugin21.playlist.add(osdChannelList1.ChannelAddress, null, null);
-                        axVLCPlugin21.playlist.playItem(0);
-
                         showOSD(!_IsMenuShown);
+                        Application.DoEvents();
+                        if (_CurrentPlaying != osdChannelList1.ChannelAddress)
+                        {
+                            axVLCPlugin21.playlist.clear();
+                            axVLCPlugin21.playlist.add(osdChannelList1.ChannelAddress, null, null);
+                            axVLCPlugin21.playlist.playItem(0);
+                        }
                     }
                     else
                     {
@@ -167,6 +242,53 @@ namespace com.CouchPotato.Main
                     break;
             }
         }
+
+        //private void MainForm_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        //{
+        //    switch (e.KeyCode)
+        //    {
+        //        case Keys.F4:
+        //            _Timer.Stop();
+        //            this.Close();
+        //            break;
+        //        case Keys.Up:
+        //            if (_IsMenuShown)
+        //                osdChannelList1.channelUp();
+        //            else
+        //                showOSD(!_IsMenuShown);
+        //            break;
+
+        //        case Keys.Down:
+        //            if (_IsMenuShown)
+        //                osdChannelList1.channelDown();
+        //            else
+        //                showOSD(!_IsMenuShown);
+        //            break;
+        //        case Keys.Enter:
+        //            if (_IsMenuShown)
+        //            {
+        //                showOSD(!_IsMenuShown);
+        //                Application.DoEvents();
+        //                if (_CurrentPlaying != osdChannelList1.ChannelAddress)
+        //                {
+        //                    axVLCPlugin21.playlist.clear();
+        //                    axVLCPlugin21.playlist.add(osdChannelList1.ChannelAddress, null, null);
+        //                    axVLCPlugin21.playlist.playItem(0);
+        //                }
+        //            }
+        //            else
+        //            {
+        //                showOSD(!_IsMenuShown);
+        //            }
+        //            break;
+        //        case Keys.Escape:
+        //            showOSD(false);
+        //            break;
+        //        default:
+        //            break;
+        //    }
+
+        //}
 
     }
 }
